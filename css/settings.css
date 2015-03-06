@@ -107,7 +107,7 @@ hr {
   height: inherit;
   font-size: 10px;
   text-transform: uppercase;
-  background: #eceeef;
+  background: #ccc;
   border-radius: inherit;
   box-shadow: inset 0 1px 2px rgba(black, .12),
               inset 0 0 2px rgba(black, .15);
@@ -116,7 +116,7 @@ hr {
 .switch-handle {
   position: absolute;
   top: 4px;
-  left: 30px;
+  left: 4px;
   width: 22px;
   height: 22px;
   background: white;
@@ -126,6 +126,10 @@ hr {
 
 .switch-green > .switch-input:checked ~ .switch-label {
   background: #00af88;
+}
+
+.switch-green > .switch-input:checked ~ .switch-handle {
+  left: 30px;
 }
 
 .notification > span {
@@ -163,10 +167,11 @@ hr {
 #privacy_controls input[type=checkbox]:checked + label:before {
   content: "\2022";
   color: #00af88;
-  font-size: 70px;
+  font-size: 64px;
   text-align: center;
   line-height: 18px;
   position: absolute;
+  left: -1px;
 }
 
 #privacy_controls .radio label:before {

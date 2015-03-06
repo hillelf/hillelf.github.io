@@ -75,6 +75,7 @@
   overflow: hidden;
   margin: 20px 0 10px;
   padding-top: 5px;
+  clear: both;
 }
 
 .show-hide-control {
@@ -83,6 +84,7 @@
 
 .share-like-links {
   float: right;
+  display: block;
 }
 
 .share-like-links a {
