@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Invision Code Challenge | Hillel Familant</title>
+  <link rel="stylesheet" type="text/css" href="css/typography.css">
+  <link rel="stylesheet" type="text/css" href="css/layout.css">
+  <link rel="stylesheet" type="text/css" href="css/settings.css">
+  <link rel="stylesheet" type="text/css" href="css/chat.css">
+</head>
+
+<body>
+
+  <!-- header -->
+  <header>
+    <a href="index.html" class="home"><img id="logo" src="images/logo.gif" alt="simplysocial" /></a>
+    <navigation id="top_nav">
+      <a href="/" id="chat_launcher"><img src="images/message_launch_icon.gif" alt="new message" /></a>
+      <form>
+        <input name="search_keyword" id="search_keyword" value="" />
+      </form>
+      <a href="/" id="profile_pic"><img src="images/user_profile_pic.jpg" alt="" /></a>
+    </navigation>
+  </header>
+
+  <!-- settting content section -->
+  <div id="settings_content">
+    <h1>Settings</h1>
+    <h2>ACCOUNT</h2>
+    <div id="personal_info">
+      <div class="profile-pic-section">
+        <img src="images/user_profile_large.png" alt="profile pic" />
+        <button>change</button>
+      </div>
+      <div class="profile-info">
+        <input type="text" name="full_name" value="Jessica Tuan" />
+        <input type="text" name="email" value="jessica@mail.com" />
+        <input type="password" name="password" value="password" />
+      </div>
+    </div>
+
+    <hr />
+
+    <h2>NOTIFICATIONS</h2>
+    <div class="notification">
+      <label class="switch switch-green">
+        <input type="checkbox" class="switch-input" checked>
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
+      <span>email me when my posts are marked as favorites</span>
+    </div>
+
+    <div class="notification">
+      <label class="switch switch-green">
+        <input type="checkbox" class="switch-input" checked>
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
+      <span>email me when I'm mentioned</span>
+    </div>
+
+    <div class="notification">
+      <label class="switch switch-green">
+        <input type="checkbox" class="switch-input" checked>
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
+      <span>email me when someone follows me</span>
+    </div>
+
+    <div class="notification">
+      <label class="switch switch-green">
+        <input type="checkbox" class="switch-input" checked>
+        <span class="switch-label" data-on="On" data-off="Off"></span>
+        <span class="switch-handle"></span>
+      </label>
+      <span>email me when my posts are marked as favorites</span>
+    </div>
+
+    <hr />
+
+    <h2>PRIVACY</h2>
+    <div id="privacy_controls">
+      <div class="notification-radio">
+        <div>
+          <input id="tag_permissions1" type="radio" name="tag_permissions" value="anyone" checked>
+          <label for="tag_permissions1"></label>
+        </div>
+        <span>allow anyone to tag me</span>
+      </div>
+
+      <div class="notification-radio">
+        <div>
+
+          <input id="tag_permissions2" type="radio" name="tag_permissions" value="followers">
+          <label for="tag_permissions2"></label>
+        </div>
+        <span>only allow people I follow to tag me</span>
+      </div>
+
+      <div class="notification-radio">
+        <div>
+          <input id="tag_permissions3" type="radio" name="tag_permissions" value="noone">
+          <label for="tag_permissions3"></label>
+        </div>
+        <span>don't allow anyone to tag me</span>
+      </div>
+
+
+      <div class="notification-checkbox">
+        <div>
+          <input id="add_location_to_post" name="add_location_to_post" type="checkbox" />
+          <label for="add_location_to_post"></label>
+        </div>
+        <span>add a location to my posts</span>
+      </div>
+
+      <div class="notification-checkbox">
+        <div>
+          <input id="let_others_find_me" name="let_others_find_me" type="checkbox" />
+          <label for="let_others_find_me"></label>
+        </div>
+        <span>let others find me by my email address</span>
+      </div>
+
+      <div class="notification-checkbox">
+        <div>
+          <input id="tailor_ads" name="tailor_ads" type="checkbox" />
+          <label for="tailor_ads"></label>
+        </div>
+        <span>tailor ads based on my information</span>
+      </div>
+
+    </div><!-- /privacy_controls -->
+
+    <hr />
+
+    <button class="green">Save Changes</button>
+  </div>
+
+  <!-- footer -->
+  <footer>
+    <ul>
+      <li><a href="/about">ABOUT</a></li>
+      <li><a href="/support">SUPPORT</a></li>
+      <li><a href="/privacy">PRIVACY</a></li>
+      <li><a href="/terms">TERMS</a></li>
+      <li>&copy; 2014 SIMPLYSOCIAL</li>
+    </ul>
+  </footer>
+
+  <div id="drop_down_wrapper">
+    <ul id="nav_drop_down">
+      <li class="first"><a href="#">Profile</a><span class="arrow-pointer">&#9650;</span></li>
+      <li><a href="#">Followers</a></li>
+      <li><a href="#">Following</a></li>
+      <li class="last"><a href="settings.html" class="settings">Settings</a></li>
+    </ul>
+  </div>
+
+  <div id="chat_modal">
+    <p>Create new message</p>
+    <form>
+      <textarea name="chat_message"></textarea>
+      <input name="submit" type="submit" value="Post" />
+    </form>
+    <span>
+      <a href="/photo/new" class="add-photo">Add Photo</a>
+      <a href="/video/new" class="add-video">Add Video</a>
+    </span>
+  </div>
+
+  <div id="overlay"></div>
+
+  <script src="js/jquery-2.1.3.min.js"></script>
+  <script src="js/index.js"></script>
+</body>
+</html>
