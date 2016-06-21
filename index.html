@@ -4,7 +4,14 @@
     <base href="http://chegg-tutors.appspot.com/" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="/public/styles.css" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <style>
+      #search_results {
+        width: 100%;
+        max-width: 450px;
+        margin: auto;
+        text-align: left;
+      }
+    </style>
   </head>
   <body>
     <div id="chg-balloon-logo-container">
@@ -17,24 +24,32 @@
         <button id="chg-balloon-submit">Check availability</button>
     </div>
 
+    <div id="search_results"></div>
+
+    <!--  jQuery template for username success message -->
+    <script id="successTemplate" type="text/x-jQuery-tmpl">
+      <div>Congrats! <strong>${username}</strong> is available!</div>
+    </script>
+
+    <!--  jQuery template for unsuccessful message  -->
+    <script id="unsuccessTemplate" type="text/x-jQuery-tmpl">
+      <div><strong>${username}</strong> is not available. How about one of these:</div>
+    </script>
+
+    <!--  jQuery template for username suggestions  -->
+    <script id="suggestionsTemplate" type="text/x-jQuery-tmpl">
+      <div><strong>${name}</strong></div>
+    </script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
+
     <script type="text/javascript">
       // we'll use '$' in the closure and leave it undefined globally
       jQuery.noConflict();
 
       (function ($) {
-        // The User search API accepts a comma-separated list of usernames, and returns
-        // user data for any matching records
-        // $.ajax("/coding-challenge/api/user/?username=Hillary2016").done(function(data) {
-        // // This logs Hillary2016's user data, since the username is registered
-        // console.log(JSON.stringify(data));
-        // });
-        //
-        // $.ajax("/coding-challenge/api/user/?username=Trump4Pres,FeelTheBern1").done(function(data) {
-        // // This logs Trump4Pres's user data, since the username is registered, but
-        // // no user data for FeelTheBern1, since that username is not currently registered
-        // console.log(JSON.stringify(data));
-        // });
-
+        // validate user input
         function validateInput(val) {
           if (!val) {
             return false;
@@ -42,19 +57,36 @@
           return true;
         }
 
+        // submit request with user input
         function submitRequest(uname) {
           var request = $.ajax({
             url: "/coding-challenge/api/user/",
-            method: "GET",
             data: { username : uname }
           });
 
           request.done(function(data) {
+            displayResult(data, uname);
             console.log(JSON.stringify(data));
+          });
+
+          request.fail(function(jqXHR, textStatus, errorThrown ) {
+            console.log("Error: " + errorThrown);
           });
         }
 
+        function displayResult(data, uname) {
 
+          if (data.length > 0) { //username is taken
+            var suggestions = [{name: "boo"}, {name: "danny"}, {name: "famjam"}];
+            $("#search_results").html( $("#unsuccessTemplate").tmpl(data) );
+            $("#suggestionsTemplate").tmpl(suggestions).appendTo("#search_results");
+          } else { //username is available
+            $("#search_results").html( $("#successTemplate").tmpl({username: uname}) );
+          }
+
+        }
+
+        // register event handler for submit button
         $("#chg-balloon-submit").click(function(e) {
 
           var inputVal = $("#chg-balloon-input").val();
