@@ -5,11 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="/public/styles.css" />
     <style>
+      hr {
+        margin-top: 30px;
+        border-top: 1px solid #e5e5e5;
+      }
+
       #search_results {
         width: 100%;
-        max-width: 450px;
+        max-width: 600px;
         margin: auto;
         text-align: left;
+      }
+
+      .circle {
+        border-radius: 50%;
+        width: 17px;
+        height: 17px;
+        padding: 6px;
+        background: #fff;
+        border: none;
+        color: #fff;
+        text-align: center;
+        font: 20px Arial, sans-serif;
+        float: left;
+        margin-right: 10px;
+      }
+
+      .circle.red {
+        background: #e50000;
+      }
+
+      .circle.green {
+        background: green;
+      }
+
+      .message {
+        margin: 20px;
+      }
+
+      .message p {
+        padding-top: 6px;
+      }
+
+      .suggestion-item {
+        margin-left: 60px;
+        border-top: 1px solid #e5e5e5;
+        padding: 20px 0;
+        font-size: 14px;
+        color: #b3b3b3;
+        font-weight: 700;
+      }
+      .suggestion-item.first {
+        padding: 10px 0 20px;
+        border-top: none;
+      }
+
+      #spinner_wrapper {
+        display: none;
+        position: relative;
+        margin-top: 20px;
+      }
+
+      .signal {
+          border: 5px solid #333;
+          border-radius: 30px;
+          height: 30px;
+          left: 50%;
+          margin: -15px 0 0 -15px;
+          opacity: 0;
+          position: absolute;
+          top: 50%;
+          width: 30px;
+          animation: pulsate 1s ease-out;
+          animation-iteration-count: infinite;
+      }
+
+      @keyframes pulsate {
+          0% {
+            transform: scale(.1);
+            opacity: 0.0;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1.2);
+            opacity: 0;
+          }
       }
     </style>
   </head>
@@ -23,22 +105,34 @@
             name="username" autocomplete="off" type="text" value="" />
         <button id="chg-balloon-submit">Check availability</button>
     </div>
-
+    <div id="spinner_wrapper">
+      <div class="signal"></div>
+    </div>
     <div id="search_results"></div>
 
     <!--  jQuery template for username success message -->
-    <script id="successTemplate" type="text/x-jQuery-tmpl">
-      <div>Congrats! <strong>${username}</strong> is available!</div>
+    <script id="successTemplate" type="text/html">
+      <hr />
+      <div class="message">
+        <div class="circle green"></div><p>Congrats! <strong>${username}</strong> is available!</p>
+      </div>
     </script>
 
     <!--  jQuery template for unsuccessful message  -->
-    <script id="unsuccessTemplate" type="text/x-jQuery-tmpl">
-      <div><strong>${username}</strong> is not available. How about one of these:</div>
+    <script id="unsuccessTemplate" type="text/html">
+      <hr />
+      <div class="message">
+        <div class="circle red">!</div><p><strong>${username}</strong> is not available. How about one of these:</p>
+      </div>
     </script>
 
     <!--  jQuery template for username suggestions  -->
-    <script id="suggestionsTemplate" type="text/x-jQuery-tmpl">
-      <div><strong>${name}</strong></div>
+    <script id="suggestionsTemplate" type="text/html">
+      {{if pos == 0}}
+        <div class="suggestion-item first">${name}</div>
+      {{else}}
+        <div class="suggestion-item">${name}</div>
+      {{/if}}
     </script>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
@@ -59,31 +153,65 @@
 
         // submit request with user input
         function submitRequest(uname) {
-          var request = $.ajax({
+          return $.ajax({
             url: "/coding-challenge/api/user/",
             data: { username : uname }
           });
-
-          request.done(function(data) {
-            displayResult(data, uname);
-            console.log(JSON.stringify(data));
-          });
-
-          request.fail(function(jqXHR, textStatus, errorThrown ) {
-            console.log("Error: " + errorThrown);
-          });
         }
 
+        // display results with jquery templates
         function displayResult(data, uname) {
-
-          if (data.length > 0) { //username is taken
-            var suggestions = [{name: "boo"}, {name: "danny"}, {name: "famjam"}];
+          if (data.length > 0) {
+            //username is taken
+            var suggestions = getSuggestions(uname);
             $("#search_results").html( $("#unsuccessTemplate").tmpl(data) );
             $("#suggestionsTemplate").tmpl(suggestions).appendTo("#search_results");
-          } else { //username is available
+          } else {
+            //username is available
             $("#search_results").html( $("#successTemplate").tmpl({username: uname}) );
           }
+        }
 
+        function getSuggestions(userInput) {
+
+          function getSuggestionWithNumber() {
+            var valid = false, _suggestion = "", count = 0, res;
+
+            while (!valid && count++ < 1000) {
+              _suggestion = userInput + parseInt(Math.random().toFixed(4) / 1 * 10000);
+              res = submitRequest(_suggestion);
+
+              res.done(function(data) {
+                valid = true;
+              });
+            }
+            return _suggestion;
+          }
+
+          function getSuggestionWithWord() {
+            var valid = false, _suggestion = "", count = 0, res;
+            while (!valid && count++ < 1000) {
+              var words = ["bat", "cat", "book", "dog", "money", "cool", "thegreat", "jungle", "kitty", "horse", "doubleyou", "fortune"];
+              _suggestion = userInput + words[ parseInt(Math.random().toFixed(1) * 10) ];
+              res = submitRequest(_suggestion);
+
+              res.done(function(data) {
+                valid = true;
+              });
+            }
+            return _suggestion;
+          }
+
+          var suggestions = [], suggestion1, suggestion2, suggestion3;
+          suggestion1 = getSuggestionWithNumber();
+          suggestion2 = getSuggestionWithNumber();
+          suggestion3 = getSuggestionWithWord();
+
+          suggestions.push({ name: suggestion1, pos: 0 });
+          suggestions.push({ name: suggestion2, pos: 1 });
+          suggestions.push({ name: suggestion3, pos: 2 });
+
+          return suggestions;
         }
 
         // register event handler for submit button
@@ -91,11 +219,20 @@
 
           var inputVal = $("#chg-balloon-input").val();
           var validInput = validateInput(inputVal);
+          $("#spinner_wrapper").show();
 
           if (validInput) {
-            submitRequest(inputVal);
+            var req = submitRequest(inputVal);
+
+            req.done(function( data, textStatus, jqXHR) {
+              displayResult(data, inputVal);
+              $("#spinner_wrapper").hide();
+            });
+            req.fail(function(jqXHR, textStatus, errorThrown ) {
+              console.log("Error: " + errorThrown);
+            });
           } else {
-            console.log("invalid input");
+            alert("Please Enter a valid user name.");
           }
         });
 
