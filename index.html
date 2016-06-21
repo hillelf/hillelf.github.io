@@ -18,27 +18,56 @@
     </div>
 
     <script type="text/javascript">
+      // we'll use '$' in the closure and leave it undefined globally
+      jQuery.noConflict();
 
+      (function ($) {
         // The User search API accepts a comma-separated list of usernames, and returns
         // user data for any matching records
+        // $.ajax("/coding-challenge/api/user/?username=Hillary2016").done(function(data) {
+        // // This logs Hillary2016's user data, since the username is registered
+        // console.log(JSON.stringify(data));
+        // });
+        //
+        // $.ajax("/coding-challenge/api/user/?username=Trump4Pres,FeelTheBern1").done(function(data) {
+        // // This logs Trump4Pres's user data, since the username is registered, but
+        // // no user data for FeelTheBern1, since that username is not currently registered
+        // console.log(JSON.stringify(data));
+        // });
 
-        $.ajax("/coding-challenge/api/user/?username=Hillary2016").done(function(data) {
-            // This logs Hillary2016's user data, since the username is registered
-            console.log(JSON.stringify(data));
+        function validateInput(val) {
+          if (!val) {
+            return false;
+          }
+          return true;
+        }
+
+        function submitRequest(uname) {
+          var request = $.ajax({
+            url: "/coding-challenge/api/user/",
+            method: "GET",
+            data: { username : uname }
           });
 
-        $.ajax("/coding-challenge/api/user/?username=Trump4Pres,FeelTheBern1").done(function(data) {
-            // This logs Trump4Pres's user data, since the username is registered, but
-            // no user data for FeelTheBern1, since that username is not currently registered
+          request.done(function(data) {
             console.log(JSON.stringify(data));
           });
+        }
 
 
-        $("chg-balloon-submit").click(function() {
+        $("#chg-balloon-submit").click(function(e) {
 
-            // This is where you come in!!
+          var inputVal = $("#chg-balloon-input").val();
+          var validInput = validateInput(inputVal);
 
+          if (validInput) {
+            submitRequest(inputVal);
+          } else {
+            console.log("invalid input");
+          }
         });
+
+      })(jQuery);
 
     </script>
 
