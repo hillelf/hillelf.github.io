@@ -128,7 +128,7 @@
 
     <!--  jQuery template for username suggestions  -->
     <script id="suggestionsTemplate" type="text/html">
-      {{if pos == 0}}
+      {{if pos === 0}}
         <div class="suggestion-item first">${name}</div>
       {{else}}
         <div class="suggestion-item">${name}</div>
@@ -159,13 +159,21 @@
           });
         }
 
+        // extend Array to create diff helper
+        Array.prototype.diff = function(a) {
+            return this.filter(function(i) {return a.indexOf(i) < 0;});
+        };
+
         // display results with jquery templates
         function displayResult(data, uname) {
           if (data.length > 0) {
             //username is taken
-            var suggestions = getSuggestions(uname);
-            $("#search_results").html( $("#unsuccessTemplate").tmpl(data) );
-            $("#suggestionsTemplate").tmpl(suggestions).appendTo("#search_results");
+            $.when( getSuggestions(uname) ).then(
+              function( data ) {
+                $("#search_results").html( $("#unsuccessTemplate").tmpl(uname) );
+                $("#suggestionsTemplate").tmpl(data).appendTo("#search_results");
+              }
+            );
           } else {
             //username is available
             $("#search_results").html( $("#successTemplate").tmpl({username: uname}) );
@@ -173,50 +181,94 @@
         }
 
         function getSuggestions(userInput) {
+          var suggestions = [],
+              dfd = $.Deferred();
+
+          function getListSuggestions() {
+            var _suggestions = [];
+            for (var x = 0; x < 50; x++) {
+              var newUsername = userInput + parseInt(Math.random().toFixed(4) * 10000);
+              _suggestions.push(newUsername);
+            }
+            return _suggestions;
+          }
 
           function getSuggestionWithNumber() {
-            var valid = false, _suggestion = "", count = 0, res;
+            var valid = false, listOfSuggestions = [], reguest, _dfd = $.Deferred();
+            listOfSuggestions = getListSuggestions();
 
-            while (!valid && count++ < 1000) {
-              _suggestion = userInput + parseInt(Math.random().toFixed(4) / 1 * 10000);
-              res = submitRequest(_suggestion);
+            request = submitRequest(listOfSuggestions.join(","));
 
-              res.done(function(data) {
+            request.done(function(data) {
+              var cleanseList = data.map(function (el) { return el.username ? el.username: 0});
+              var availablelist = listOfSuggestions.diff(cleanseList);
+              if (availablelist.length > 0) {
                 valid = true;
-              });
-            }
-            return _suggestion;
+                _dfd.resolve({ name: availablelist[0]});
+              } else {
+                getSuggestionWithNumber();
+              }
+            });
+
+            return _dfd.promise();
           }
 
           function getSuggestionWithWord() {
-            var valid = false, _suggestion = "", count = 0, res;
-            while (!valid && count++ < 1000) {
-              var words = ["bat", "cat", "book", "dog", "money", "cool", "thegreat", "jungle", "kitty", "horse", "doubleyou", "fortune"];
-              _suggestion = userInput + words[ parseInt(Math.random().toFixed(1) * 10) ];
-              res = submitRequest(_suggestion);
+            var valid = false, listOfSuggestions = [], reguest, _dfd = $.Deferred();
+            var randomWords = ["bat", "cat", "book", "dog", "money", "cool", "thegreat", "jungle", "kitty", "horse"];
+            var newWords = randomWords.map(function (word) { return userInput + word });
 
-              res.done(function(data) {
+            request = submitRequest(newWords.join(","));
+
+            request.done(function(data) {
+              var cleanseList = data.map(function (el) { return el.username ? el.username: 0});
+              var availablelist = newWords.diff(cleanseList);
+              if (availablelist.length > 0) {
                 valid = true;
-              });
-            }
-            return _suggestion;
+                _dfd.resolve({ name: availablelist[0]});
+              } else {
+                getSuggestionWithWord();
+              }
+            });
+
+            return _dfd.promise();
           }
 
-          var suggestions = [], suggestion1, suggestion2, suggestion3;
-          suggestion1 = getSuggestionWithNumber();
-          suggestion2 = getSuggestionWithNumber();
-          suggestion3 = getSuggestionWithWord();
+          $.when( getSuggestionWithNumber() ).then(
+            function( obj ) {
+              obj.pos = suggestions.length;
+              suggestions.push(obj);
+              resolvePromise();
+            }
+          );
 
-          suggestions.push({ name: suggestion1, pos: 0 });
-          suggestions.push({ name: suggestion2, pos: 1 });
-          suggestions.push({ name: suggestion3, pos: 2 });
+          $.when( getSuggestionWithNumber() ).then(
+            function( obj ) {
+              obj.pos = suggestions.length;
+              suggestions.push(obj);
+              resolvePromise();
+            }
+          );
 
-          return suggestions;
+          $.when( getSuggestionWithWord() ).then(
+            function( obj ) {
+              obj.pos = suggestions.length;
+              suggestions.push(obj);
+              resolvePromise();
+            }
+          );
+
+          function resolvePromise() {
+            if (suggestions.length > 2) {
+              dfd.resolve(suggestions);
+            }
+          }
+
+          return dfd.promise();
         }
 
         // register event handler for submit button
         $("#chg-balloon-submit").click(function(e) {
-
           var inputVal = $("#chg-balloon-input").val();
           var validInput = validateInput(inputVal);
           $("#spinner_wrapper").show();
@@ -230,9 +282,11 @@
             });
             req.fail(function(jqXHR, textStatus, errorThrown ) {
               console.log("Error: " + errorThrown);
+              $("#spinner_wrapper").hide();
             });
           } else {
             alert("Please Enter a valid user name.");
+            $("#spinner_wrapper").hide();
           }
         });
 
